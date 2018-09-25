@@ -8,6 +8,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,View.OnTouchListener{
     protected TextView score;
@@ -27,6 +29,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected Paint myPaint;
     protected Random random;
     protected int s;
+    protected GestureDetector myDetector;
+    protected CustomListener listener;
 
     protected boolean isPlay;
     @Override
@@ -45,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.btnAction.setOnClickListener(this);
         this.iv.setOnTouchListener(this);
 
+        this.listener=new CustomListener();
+        this.myDetector=new GestureDetector(this,this.listener);
+
         this.arrRect=new ArrayList<>();
         this.s=0;
     }
@@ -59,46 +66,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }else{
                 this.isPlay=!this.isPlay;
                 this.btnAction.setText("Start");
+                this.s=0;
+                this.score.setText(s+"");
             }
 
         }
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction() & MotionEvent.ACTION_MASK){
-            case MotionEvent.ACTION_DOWN:
-                int x=(int)event.getX();
-                int y=(int)event.getY();
-                if(this.cek(x,y) && this.isPlay){
-//                    Paint paint=new Paint();
-//                    int mColorTest=ResourcesCompat.getColor(getResources(),R.color.background_color,null);
-//                    paint.setColor(mColorTest);
-//
-//                    Rect rect=new Rect(10,10,100,100);//top y bottom x
-//
-//                    canvas.drawRect(rect,paint);
-                    this.s+=10;
-                    this.score.setText(s+"");
-                }
-                Log.d("touch_listener",x +" "+y);
-                break;
-//            case MotionEvent.ACTION_POINTER_DOWN:
-//                Log.d("touch_listener","pointer_down");
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                Log.d("touch_listener","up");
-//                break;
-//            case MotionEvent.ACTION_POINTER_UP:
-//                Log.d("touch_listener","pointer_up");
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                Log.d("touch_listener","move");
-//                break;
-        }
-
-        return true;
-
     }
 
     public void create(){
@@ -121,61 +93,153 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void generateRect(){
+        int left  = 0 , top = 0 , right = 0 , bottom = 0 ;
         for(int i=0;i<5;i++){
-            int leftTop=10+this.random.nextInt(301);
-            int bottomRight=100+this.random.nextInt(801);
-//            if(this.arrRect.size()==0){
-                this.createRect(leftTop,bottomRight);
-//            }else{
-//                int j=0;
-//                while(j<this.arrRect.size()-1){
-//                    if(a>this.arrRect.get(j) && b>this.arrRect.get(j+1)){
-//                        this.createRect(a,b);
-//                        j+=2;
-//                    }else {
-//                        a=10+this.random.nextInt(101);
-//                        b=100+this.random.nextInt(501);
-//                    }
-//                }
-//            }
+
+            boolean cek=false;
+            Rect newR = new Rect();
+            while(!cek){
+                 left = generateLeft();
+                 top  = generateTop();
+                 right = left + 100 ;
+                 bottom = top + 100;
+                newR = new Rect(left , top , right , bottom);
+                if(!checkContainsAll(newR)){
+                    cek = !cek;
+                }
+            }
+            Log.d("rect Post" , left+" " + top + " " + right +" " + bottom);
+            this.createRect(left,top,right,bottom);
+
+
+
         }
 
     }
 
-    private void createRect(int a,int b){
-        Rect rect=new Rect(a,a,b,b);
+    private void createRect(int left,int top,int right,int bottom){
+        Rect rect=new Rect(left,top,right,bottom);
+        Log.d("created Rect"  , rect.left + " " + rect.top + " " + rect.right + " " + rect.bottom);
         this.canvas.drawRect(rect,this.myPaint);
+
         this.arrRect.add(rect);
         this.iv.invalidate();
     }
 
-    public boolean cek(int x,int y){
-        for(int i=0;i<this.arrRect.size()-1;i++){
-            if(x>this.arrRect.get(i).left && y<this.arrRect.get(i).right){
+    public boolean cek(float x,float y){
+
+
+
+        for(int i=0;i<this.arrRect.size();i++){
+            boolean a=x>=this.arrRect.get(i).left && x<=this.arrRect.get(i).right;
+            boolean b=y>=this.arrRect.get(i).top && y<=this.arrRect.get(i).bottom;
+            Log.d("koor",x+" "+y);
+            if((a && b) && isPlay ){
                 //timbpah gambar
                 Paint paint=new Paint();
                 int mColorTest=ResourcesCompat.getColor(getResources(),R.color.background_color,null);
                 paint.setColor(mColorTest);
 
-                int x1=this.arrRect.get(i).left;
-                int y1=this.arrRect.get(i).right;
-                Rect rect=new Rect(x1,x1,y1,y1);//top y bottom x
+                int left=this.arrRect.get(i).left;
+                int top=this.arrRect.get(i).top;
+                int right=this.arrRect.get(i).right;
+                int bottom=this.arrRect.get(i).bottom;
+                Rect rect=new Rect(left,top,right,bottom);//top y bottom x
 
                 canvas.drawRect(rect,paint);
+                this.iv.invalidate();
                 //hapus dari arr
                 this.arrRect.remove(i);
 
-                //random baru
-                int a=10+this.random.nextInt(( iv.getWidth()));
-                int b=100+this.random.nextInt(iv.getHeight());
-                rect=new Rect(a,a,b,b);
-                canvas.drawRect(rect,this.myPaint);
-                this.arrRect.add(rect);
-                this.iv.invalidate();
+//                boolean cek=false;
+//                Rect newR = null;
+//                while(!cek){
+//                    left = generateLeft();
+//                    top  = generateTop();
+//                    right = left + 100 ;
+//                    bottom = top + 100;
+//                    newR = new Rect(left , top , right , bottom);
+//                    if(!checkContainsAll(newR)){
+//                        cek = !cek;
+//                    }
+//                }
+//                canvas.drawRect(newR,this.myPaint);
+//                this.arrRect.add(newR);
+//                this.iv.invalidate();
                 return true;
             }
         }
         return false;
     }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return this.myDetector.onTouchEvent(event);
+    }
+
+    private class CustomListener extends GestureDetector.SimpleOnGestureListener{
+        @Override
+        public boolean onDown(MotionEvent e) {
+            float x=e.getX();
+            float y=e.getY();
+            Log.d("onDown" , x + " " + y);
+            if(cek(x,y)  && isPlay ){
+                Log.d("tes tekan","PAS");
+                Paint paint=new Paint();
+                    int mColorTest=ResourcesCompat.getColor(getResources(),R.color.background_color,null);
+                    paint.setColor(mColorTest);
+
+//                    int left=10+random.nextInt(iv.getWidth());
+//                    int top=10+random.nextInt(iv.getHeight());
+//                    int right=left+100;
+//                    int bottom=top+100;
+//                    createRect(left,top,right,bottom);
+
+
+                    s+=10;
+                    score.setText(s+"");
+            }
+
+            return true;
+        }
+        
+
+    }
+
+
+    private int generateLeft(){
+        Random r =  new Random();
+        int left = 10 + r.nextInt(canvas.getWidth());
+        while(left + 100 >= canvas.getWidth()){
+            left =10+ r.nextInt(canvas.getWidth());
+        }
+        return left;
+    }
+
+    private int generateTop(){
+        Random r =  new Random();
+        int top =10+ r.nextInt(canvas.getHeight());
+        while(top + 100 >= canvas.getHeight()){
+            top =10+ r.nextInt(canvas.getHeight());
+        }
+        return top;
+    }
+
+    /**
+     * Method buat cek apakah rect yang baru mau dimasukin
+     * nabrak
+     * @param newR
+     * @return true jika newRect nabrak dengan kumpulan rect yang ada di arrRect
+     */
+    private boolean checkContainsAll(Rect newR){
+        for (int i = 0; i < arrRect.size(); i++) {
+            if(arrRect.get(i).intersect(newR)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
 }
