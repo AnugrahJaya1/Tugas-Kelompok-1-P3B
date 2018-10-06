@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentContainer , fragmentHome );
                 fragmentTransaction.commit();
+                inGame=!inGame;
+
 
                 btnStart.setText(R.string.btn_start);
                 tv_timer.setVisibility(View.INVISIBLE);
