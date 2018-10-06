@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 fragmentTransaction.commit();
 
                 this.btnStart.setText("START");
+                this.inGame=!this.inGame;
                 this.resetTimer();
             }
         }
