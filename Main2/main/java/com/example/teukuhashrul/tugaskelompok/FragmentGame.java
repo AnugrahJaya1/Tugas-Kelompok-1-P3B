@@ -131,6 +131,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
 //        this.iv.invalidate();
 
         this.generateRect();
+        this.generetCircle();
         this.iv.invalidate();
     }
 
@@ -300,6 +301,83 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
             }
         }
         return false;
+    }
+    
+    private void generetCircle(){
+        for(int i=0;i<5;i++){
+            this.cekKoorC();
+        }
+    }
+
+    private void cekKoorC(){
+        int x=0,y=0,t1=0,t2=0;
+        boolean cek=false;
+
+        while(true) {
+            x=this.generateX();
+            y=this.generateY();
+            t1=x+100;
+            t2=y+100;
+            Rect r=new Rect(x,y,t1,t2);
+            if(!checkContainsAll(r)){
+                this.createCircle(x+50,y+50);
+                cek=true;
+                //break;
+            }
+            if(cek==true){
+                break;
+            }else{
+                while(this.checkPosition(x,y)){
+                    //createCircle
+                    this.createCircle(x,y);
+                    break;
+                }
+                break;
+            }
+        }
+    }
+
+    private int generateX(){
+        int x=10+this.random.nextInt(this.canvas.getWidth());
+        while(x+100>this.canvas.getWidth()){
+            x=10+random.nextInt(this.canvas.getWidth());
+        }
+        return x;
+    }
+
+    private int generateY(){
+        int y=10+this.random.nextInt(this.canvas.getHeight());
+        while(y+100>this.canvas.getWidth()){
+            y=10+random.nextInt(this.canvas.getHeight());
+        }
+        return y;
+    }
+
+    private boolean checkPosition(int x,int y){
+        for(int i=0;i<this.arrCir.size()-2;i+=2){
+            int btsXMin=this.arrCir.get(i)-50;
+            int btsXMax=this.arrCir.get(i)+50;
+
+            int btsYMin=this.arrCir.get(i+1)-50;
+            int btsYMax=this.arrCir.get(i+1)+50;
+
+            boolean a= x>=btsXMin && x<=btsXMax;
+            boolean b= y>=btsYMin && y<=btsYMax;
+            if(a && b){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void createCircle(int x,int y){
+        int color=ResourcesCompat.getColor(getResources(),R.color.colorAccent,null);
+        Paint p=new Paint();
+        p.setColor(color);
+
+        this.canvas.drawCircle(x,y,50,p);
+        this.arrCir.add(x);
+        this.arrCir.add(y);
     }
 
 
