@@ -14,6 +14,15 @@
         android:id="@+id/startGame"
         />
 
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/startGame"
+        android:layout_alignParentEnd="true"
+        android:text="0:00"
+        android:textSize="30sp"
+        android:layout_alignParentRight="true" />
     <RelativeLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
