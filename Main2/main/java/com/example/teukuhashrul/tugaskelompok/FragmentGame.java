@@ -194,11 +194,18 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
             boolean b=y>=this.arrRect.get(i).top && y<=this.arrRect.get(i).bottom;
             if(a && b){
                 Log.d("tolong","Kepencet"+" "+i);
+                int l=this.arrRect.get(i).left;
+                int t=this.arrRect.get(i).top;
+                int r=this.arrRect.get(i).right;
+                int bt=this.arrRect.get(i).bottom;
+
+                this.removeRect(l,t,r,bt);
+                
                 this.arrRect.remove(i);
 
-                this.resetCanvas();
+//                 this.resetCanvas();
 
-                this.reDraw();
+//                 this.reDraw();
 
                 this.cekKoor();
 
@@ -208,6 +215,21 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
             }
         }
         return false;
+    }
+    
+    /**
+     * metod untuk menutupi rect dengan warna putih
+     * @param left koor left rect
+     * @param top koor top rect
+     * @param rigth koor rigth rect
+     * @param bottom koor bottom rect
+     */
+    private void removeRect(int left,int top,int rigth,int bottom){
+        Rect r=new Rect(left,top,rigth,bottom);
+        Paint p=new Paint();
+        int c= ResourcesCompat.getColor(getResources(),R.color.background_color,null);
+        p.setColor(c);
+        this.canvas.drawRect(r,p);
     }
 
     /**
@@ -294,7 +316,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
                 float x=e.getX();
                 float y=e.getY();
                 Log.d("debug" , x + " " + y);
-                if(cek(x,y)  ){
+                if(cek(x,y)){
                     Log.d("tes tekan","PAS");
                     s+=10;
                     score.setText(s+"");
