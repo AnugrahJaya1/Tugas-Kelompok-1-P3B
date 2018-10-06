@@ -3,6 +3,7 @@ package com.example.teukuhashrul.tugaskelompok;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -29,8 +30,10 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
     protected ImageView iv;
     protected Canvas canvas;
     protected Button btnAction;
-    protected TextView score;
+    protected TextView score,target;
     protected ArrayList<Rect> arrRect;
+    protected ArrayList<Integer> arrCir;
+    protected ArrayList<Integer> arrNumber;
     protected Bitmap bitmap;
     protected Paint myPaint;
     protected Random random ;
@@ -64,6 +67,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
         this.btnAction = res.findViewById(R.id.btn_start);
         this.btnAction.setOnClickListener(this);
         this.score = res.findViewById(R.id.score);
+        this.target=res.findViewById(R.id.target);
 
         this.myPaint = new Paint();
         this.random = new Random();
@@ -93,11 +97,16 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
                 this.score.setText(s+"");
 
                 this.arrRect=new ArrayList<>();
+                this.arrCir=new ArrayList<>();
+                this.arrNumber=new ArrayList<>();
                 this.create();
                 this.isPlay=!this.isPlay;
                 this.iv.setOnTouchListener(this);
                 activity.startTimer();
                 activity.tv_timer.setVisibility(View.VISIBLE);
+
+                int t=1+this.random.nextInt(5);
+                this.target.setText(t+"");
             }else{
                 this.isPlay=!this.isPlay;
                 this.btnAction.setText("Start");
@@ -131,7 +140,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
 //        this.iv.invalidate();
 
         this.generateRect();
-        this.generetCircle();
+//        this.generetCircle();
         this.iv.invalidate();
     }
 
@@ -141,14 +150,15 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
      */
     private void generateRect(){
         for(int i=0;i<5;i++){
-            this.cekKoor();
+            this.arrNumber.add(i+1);
+            this.cekKoor(i);
         }
     }
 
     /**
      * random posisi baru,kalau bisa panggil createRect
      */
-    private void cekKoor(){
+    private void cekKoor(int posisi){
         int left  = 0 , top = 0 , right = 0 , bottom = 0 ;
         boolean cek=false;
         Rect newR = null;
@@ -162,7 +172,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
             if(!checkContainsAll(newR)){
                 cek = !cek;
                 Log.d("ceking_R",newR.left+" "+newR.top+" "+newR.right+" "+newR.bottom);
-                this.createRect(newR);
+                this.createRect(newR,posisi);
             }
             Log.d("rect Post" , left+" " + top + " " + right +" " + bottom);
         }
@@ -174,10 +184,16 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
      * invalidate
      * masukin ke arrayList
      */
-    private void createRect(Rect newR){
+    private void createRect(Rect newR,int posisi){
         Log.d("debug_rect","Create rect terpanggil");
         this.canvas.drawRect(newR,this.myPaint);
-//        this.iv.invalidate();
+
+        Paint p=new Paint();
+        p.setColor(Color.BLACK);
+        p.setTextSize(50);
+        this.canvas.drawText(this.arrNumber.get(posisi)+"",newR.left+50,newR.top+50,p);
+
+//        this.iv.invalidate();,
         this.arrRect.add(newR);
     }
 
@@ -193,22 +209,15 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
         for(int i=0;i<this.arrRect.size();i++){
             boolean a=x>=this.arrRect.get(i).left && x<=this.arrRect.get(i).right;
             boolean b=y>=this.arrRect.get(i).top && y<=this.arrRect.get(i).bottom;
-            if(a && b){
+
+            int t=Integer.parseInt(this.target.getText().toString());
+            if((a && b) && (i+1==t)){
                 Log.d("tolong","Kepencet"+" "+i);
-                int l=this.arrRect.get(i).left;
-                int t=this.arrRect.get(i).top;
-                int r=this.arrRect.get(i).right;
-                int bt=this.arrRect.get(i).bottom;
+                this.setArrayRect(i);
 
-                this.removeRect(l,t,r,bt);
-                
-                this.arrRect.remove(i);
+                this.resetCanvas();
 
-//                 this.resetCanvas();
-
-//                 this.reDraw();
-
-                this.cekKoor();
+                this.reDraw();
 
                 this.iv.invalidate();
 
@@ -217,20 +226,26 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
         }
         return false;
     }
-    
-    /**
-     * metod untuk menutupi rect dengan warna putih
-     * @param left koor left rect
-     * @param top koor top rect
-     * @param rigth koor rigth rect
-     * @param bottom koor bottom rect
-     */
-    private void removeRect(int left,int top,int rigth,int bottom){
-        Rect r=new Rect(left,top,rigth,bottom);
-        Paint p=new Paint();
-        int c= ResourcesCompat.getColor(getResources(),R.color.background_color,null);
-        p.setColor(c);
-        this.canvas.drawRect(r,p);
+
+    public void setArrayRect(int posisi){
+        Rect rect=null;
+
+        int left  = 0 , top = 0 , right = 0 , bottom = 0 ;
+        boolean cek=false;
+
+        while(!cek){
+            left = generateLeft();
+            top  = generateTop();
+            right = left + 100 ;
+            bottom = top + 100;
+            rect = new Rect(left , top , right , bottom);
+            if(!checkContainsAll(rect)){
+                cek = !cek;
+//                        Log.d("ceking_R",newR.left+" "+newR.top+" "+newR.right+" "+newR.bottom);
+                this.arrRect.set(posisi,rect);
+            }
+            Log.d("rect Post" , left+" " + top + " " + right +" " + bottom);
+        }
     }
 
     /**
@@ -241,7 +256,7 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
 
         int mColorBackground= ResourcesCompat.getColor(getResources(),R.color.background_color,null);
         this.canvas.drawColor(mColorBackground);
-        this.iv.invalidate();
+//        this.iv.invalidate();
     }
 
     /**
@@ -250,10 +265,12 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
     private void reDraw(){
         for(int i=0;i<this.arrRect.size();i++){
             this.canvas.drawRect(this.arrRect.get(i),this.myPaint);
+            Paint p=new Paint();
+            p.setColor(Color.BLACK);
+            p.setTextSize(50);
+            this.canvas.drawText(this.arrNumber.get(i)+"",this.arrRect.get(i).left+50,this.arrRect.get(i).top+50,p);
 
         }
-//        this.iv.invalidate();
-
     }
 
 
@@ -263,10 +280,10 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
      * @return koor left
      */
     private int generateLeft(){
-        Random r =  new Random();
-        int left = 10 + r.nextInt(canvas.getWidth());
+//        Random r =  new Random();
+        int left = 10 + random.nextInt(canvas.getWidth());
         while(left + 100 >= canvas.getWidth()){
-            left =10+ r.nextInt(canvas.getWidth());
+            left =10+ random.nextInt(canvas.getWidth());
         }
         return left;
     }
@@ -276,10 +293,10 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
      * @return koor top
      */
     private int generateTop(){
-        Random r =  new Random();
-        int top =10+ r.nextInt(canvas.getHeight());
+//        Random r =  new Random();
+        int top =10+ random.nextInt(canvas.getHeight());
         while(top + 100 >= canvas.getHeight()){
-            top =10+ r.nextInt(canvas.getHeight());
+            top =10+ random.nextInt(canvas.getHeight());
         }
         return top;
     }
@@ -302,7 +319,21 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
         }
         return false;
     }
-    
+
+//    /**
+////     * metod untuk menutupi rect dengan warna putih
+////     * @param left koor left rect
+////     * @param top koor top rect
+////     * @param rigth koor rigth rect
+////     * @param bottom koor bottom rect
+////     */
+////    private void removeRect(int left,int top,int rigth,int bottom){
+////        Rect r=new Rect(left,top,rigth,bottom);
+////        Paint p=new Paint();
+////        int c= ResourcesCompat.getColor(getResources(),R.color.background_color,null);
+////        p.setColor(c);
+////        this.canvas.drawRect(r,p);
+////    }
     private void generetCircle(){
         for(int i=0;i<5;i++){
             this.cekKoorC();
@@ -381,7 +412,6 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
     }
 
 
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         return this.myDetector.onTouchEvent(event);
@@ -398,6 +428,8 @@ public class FragmentGame extends Fragment implements View.OnClickListener , Vie
                     Log.d("tes tekan","PAS");
                     s+=10;
                     score.setText(s+"");
+                    int t=1+random.nextInt(5);
+                    target.setText(t+"");
                 }
             }
             return true;
