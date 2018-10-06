@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected FragmentManager fragmentManager;
 
     protected Button btnStart;
+    
+    protected boolean inGame;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.fragmentHome = FragmentHome.newInstance(this);
 
         this.fragmentManager = this.getSupportFragmentManager() ;
+        
+        this.inGame=false;
 
         FragmentTransaction fragmentTransaction  = this.fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragmentContainer , fragmentHome);
@@ -52,13 +56,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if(this.btnStart == v){
 
-            if(this.btnStart.getText().toString().equals("START")){
+            if(!this.inGame){
                 Log.d("masuk" , "ulala");
                 FragmentTransaction fragmentTransaction = this.fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentContainer , fragmentGame);
                 fragmentTransaction.commit();
 
                 this.btnStart.setText("FINISH");
+                this.inGame=!this.inGame;
 //                this.startTimer();
 //                this.tv_timer.setVisibility(View.VISIBLE);
 
