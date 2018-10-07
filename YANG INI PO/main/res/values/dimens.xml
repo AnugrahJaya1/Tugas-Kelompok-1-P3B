@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sizeText">20dp</dimen>
+    <dimen name="heightIV">490dp</dimen>
+    <dimen name="target">165dp</dimen>
+</resources>
